@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kinetic-facade-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kinetic_facade
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - kinetic_facade_pgdata:/var/lib/postgresql/data
+
+volumes:
+  kinetic_facade_pgdata:
