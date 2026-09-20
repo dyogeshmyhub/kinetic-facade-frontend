@@ -1,6 +1,7 @@
 import { Gauge, RefreshCw, Thermometer } from 'lucide-react'
+import MotorLocation from './MotorLocation'
 
-function MotorControl({ motorState, onSpeedChange, onSync }) {
+function MotorControl({ motorState, onSpeedChange, onSync, onViewOnMap }) {
   return (
     <section className="panel">
       <div className="panel__header">
@@ -12,7 +13,7 @@ function MotorControl({ motorState, onSpeedChange, onSync }) {
         {motorState.map((motor) => (
           <div key={motor.id} className="motor-card">
             <div className="motor-card__top">
-              <div className="motor-card__identity"><span className="motor-card__icon"><Gauge size={16} /></span><div><div className="motor-card__name">{motor.name}</div><small>ACT-{String(motor.id).padStart(2, '0')} · Online</small></div></div>
+              <div className="motor-card__identity"><span className="motor-card__icon"><Gauge size={16} /></span><div><div className="motor-card__name">{motor.name}</div><small>ACT-{String(motor.id).padStart(2, '0')} · {motor.status}</small></div></div>
               <span
                 className={`motor-card__status ${
                   motor.status === 'Running'
@@ -43,6 +44,7 @@ function MotorControl({ motorState, onSpeedChange, onSync }) {
               <span><Thermometer size={12} /> Temperature</span>
               <span>{motor.temp}°C</span>
             </div>
+            <MotorLocation motor={motor} onViewOnMap={onViewOnMap} />
           </div>
         ))}
       </div>

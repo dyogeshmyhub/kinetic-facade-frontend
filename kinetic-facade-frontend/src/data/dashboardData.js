@@ -1,4 +1,4 @@
-export const navItems = ['Overview', 'Motors', 'Sequences', 'Alarms', 'Reports', 'Settings']
+export const navItems = ['Overview', 'Motors', 'Sequences', 'Automation', 'Scheduler', 'Environment', 'Devices', 'Alarms', 'Reports', 'Settings']
 
 export const metrics = [
   { label: 'System Status', value: 'Online', trend: '+2.4% vs yesterday' },
@@ -7,7 +7,38 @@ export const metrics = [
   { label: 'Cycle Time', value: '00:42', trend: 'Stable performance' },
 ]
 
-export const chartData = [42, 55, 50, 63, 68, 90, 86, 94, 88, 72, 76, 83]
+export const powerFlowData = [
+  { label: '06:00', value: 112 },
+  { label: '08:00', value: 128 },
+  { label: '10:00', value: 121 },
+  { label: '12:00', value: 143 },
+  { label: '14:00', value: 151 },
+  { label: '16:00', value: 166 },
+  { label: '18:00', value: 159 },
+  { label: '20:00', value: 174 },
+  { label: '22:00', value: 168 },
+  { label: '00:00', value: 146 },
+  { label: '02:00', value: 151 },
+  { label: '04:00', value: 158 },
+]
+
+export const energyByMonth = [
+  { label: 'Apr', value: 118 },
+  { label: 'May', value: 126 },
+  { label: 'Jun', value: 121 },
+  { label: 'Jul', value: 139 },
+  { label: 'Aug', value: 132 },
+  { label: 'Sep', value: 148 },
+]
+
+export const operatingMix = [
+  { label: 'Active movement', value: 54, color: '#16805f' },
+  { label: 'Standby', value: 28, color: '#16839d' },
+  { label: 'Maintenance', value: 12, color: '#c98512' },
+  { label: 'Offline', value: 6, color: '#c44949' },
+]
+
+export const chartData = powerFlowData.map(({ value }) => value)
 
 export const alarmHistory = [
   { time: '08:42', level: 'Critical', message: 'Motor B overload', resolved: true },
@@ -40,10 +71,10 @@ export const steps = [
 ]
 
 export const motors = [
-  { id: 1, name: 'Motor A', status: 'Running', speed: 78, temp: 56 },
-  { id: 2, name: 'Motor B', status: 'Idle', speed: 34, temp: 42 },
-  { id: 3, name: 'Motor C', status: 'Running', speed: 62, temp: 51 },
-  { id: 4, name: 'Motor D', status: 'Standby', speed: 18, temp: 39 },
+  { id: 1, name: 'Motor A', status: 'Running', health: 'Normal', position: 72, speed: 78, temp: 56, building: 'Kinetic Facade Building', block: 'A', floor: 3, facade: 'East', panel: 'E-01', latitude: 17.3850, longitude: 78.4867 },
+  { id: 2, name: 'Motor B', status: 'Idle', health: 'Warning', position: 48, speed: 34, temp: 42, building: 'Kinetic Facade Building', block: 'A', floor: 4, facade: 'South', panel: 'S-02', latitude: 17.3854, longitude: 78.4865 },
+  { id: 3, name: 'Motor C', status: 'Running', health: 'Normal', position: 88, speed: 62, temp: 51, building: 'Kinetic Facade Building', block: 'B', floor: 6, facade: 'West', panel: 'W-03', latitude: 17.3848, longitude: 78.4871 },
+  { id: 4, name: 'Motor D', status: 'Standby', health: 'Critical', position: 20, speed: 18, temp: 39, building: 'Kinetic Facade Building', block: 'B', floor: 2, facade: 'North', panel: 'N-04', latitude: 17.3852, longitude: 78.4873 },
 ]
 
 export const healthItems = [

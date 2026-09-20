@@ -1,10 +1,14 @@
 import { navItems } from '../data/dashboardData'
-import { Activity, Bell, ChevronLeft, ChevronRight, FileBarChart, Gauge, Layers3, Settings, Waves } from 'lucide-react'
+import { Activity, Bell, CalendarClock, ChevronLeft, ChevronRight, Cpu, FileBarChart, Gauge, Layers3, Settings, Sun, WandSparkles, Waves } from 'lucide-react'
 
 const navIcons = {
   Overview: Activity,
   Motors: Gauge,
   Sequences: Layers3,
+  Automation: WandSparkles,
+  Scheduler: CalendarClock,
+  Environment: Sun,
+  Devices: Cpu,
   Alarms: Bell,
   Reports: FileBarChart,
   Settings,

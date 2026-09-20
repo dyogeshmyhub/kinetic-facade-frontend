@@ -1,11 +1,15 @@
+import { useState } from 'react'
 import PerformanceChart from '../components/PerformanceChart'
 import SystemHealth from '../components/SystemHealth'
 import MotorControl from '../components/MotorControl'
 import AlarmHistory from '../components/AlarmHistory'
 import SequenceBuilder from '../components/SequenceBuilder'
 import MetricCard from '../components/MetricCard'
-import { metrics, summaryCards } from '../data/dashboardData'
+import { BarChart, DonutChart } from '../components/AnalyticsCharts'
+import { energyByMonth, metrics, operatingMix, summaryCards } from '../data/dashboardData'
 import { Download } from 'lucide-react'
+import { MotorHealthPanel } from './FeaturePages'
+import MotorMap from '../components/MotorMap'
 
 export function OverviewPage({ motorState, onSpeedChange, onSync, alarms, onAcknowledge, activeStep, isSequenceRunning, onRunSequence }) {
   return (
@@ -30,18 +34,48 @@ export function OverviewPage({ motorState, onSpeedChange, onSync, alarms, onAckn
         <MotorControl motorState={motorState} onSpeedChange={onSpeedChange} onSync={onSync} />
         <AlarmHistory alarms={alarms} onAcknowledge={onAcknowledge} />
       </div>
+      <div className="analytics-grid">
+        <BarChart data={energyByMonth} title="Energy demand" eyebrow="Trend comparison" unit="kW" />
+        <DonutChart data={operatingMix} title="Operating mix" eyebrow="Current allocation" />
+      </div>
+      <div className="feature-metrics overview-feature-strip">
+        <div className="feature-metric"><span>Environment</span><strong>31 C / 64%</strong><small>High sunlight detected</small></div>
+        <div className="feature-metric"><span>Automation</span><strong>Automatic</strong><small>Shading rule active</small></div>
+        <div className="feature-metric"><span>Devices</span><strong>3 / 4 online</strong><small>42 ms average response</small></div>
+        <div className="feature-metric"><span>Next schedule</span><strong>17:30</strong><small>Evening close / 20%</small></div>
+      </div>
+      <MotorHealthPanel motorState={motorState} />
       <SequenceBuilder activeStep={activeStep} isRunning={isSequenceRunning} onRun={onRunSequence} />
     </>
   )
 }
 
 export function MotorsPage({ motorState, onSpeedChange, onSync }) {
+  const [filters, setFilters] = useState({ building: 'All', block: 'All', floor: 'All', facade: 'All', status: 'All', health: 'All' })
+  const [focusedMotorId, setFocusedMotorId] = useState(null)
+  const filterOptions = {
+    building: [...new Set(motorState.map((motor) => motor.building))],
+    block: [...new Set(motorState.map((motor) => motor.block))],
+    floor: [...new Set(motorState.map((motor) => motor.floor))].sort((a, b) => a - b),
+    facade: [...new Set(motorState.map((motor) => motor.facade))],
+    status: [...new Set(motorState.map((motor) => motor.status))],
+    health: [...new Set(motorState.map((motor) => motor.health))],
+  }
+  const filteredMotors = motorState.filter((motor) => Object.entries(filters).every(([key, value]) => value === 'All' || String(motor[key]) === value))
+  const updateFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value }))
+  const handleViewOnMap = (id) => {
+    setFocusedMotorId(id)
+    window.requestAnimationFrame(() => document.getElementById('motor-map')?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
+  }
   return (
     <WorkspaceFrame eyebrow="Actuator network" title="Motor control center" description="Command, tune, and inspect every kinetic facade actuator from one operational view.">
+      <MotorFilters filters={filters} options={filterOptions} onChange={updateFilter} resultCount={filteredMotors.length} />
       <div className="dashboard-grid dashboard-grid--middle workspace-grid-single">
-        <MotorControl motorState={motorState} onSpeedChange={onSpeedChange} onSync={onSync} />
+        <MotorControl motorState={filteredMotors} onSpeedChange={onSpeedChange} onSync={onSync} onViewOnMap={handleViewOnMap} />
         <SystemHealth />
       </div>
+      <MotorHealthPanel motorState={filteredMotors} onViewOnMap={handleViewOnMap} />
+      <MotorMap motors={filteredMotors} focusedMotorId={focusedMotorId} />
     </WorkspaceFrame>
   )
 }
@@ -99,6 +133,10 @@ export function ReportsPage() {
           <button className="btn btn--primary" type="button" onClick={exportReport}><Download size={14} /> Export operations report</button>
         </section>
       </div>
+      <div className="analytics-grid">
+        <BarChart data={energyByMonth} title="Monthly energy demand" eyebrow="Six-month comparison" unit="kW" />
+        <DonutChart data={operatingMix} title="Utilization breakdown" eyebrow="September operating time" />
+      </div>
     </WorkspaceFrame>
   )
 }
@@ -128,6 +166,11 @@ function WorkspaceFrame({ eyebrow, title, description, children }) {
       {children}
     </section>
   )
+}
+
+function MotorFilters({ filters, options, onChange, resultCount }) {
+  const labels = { building: 'Building', block: 'Block', floor: 'Floor', facade: 'Facade', status: 'Status', health: 'Health' }
+  return <section className="panel motor-filters"><div><div className="panel__eyebrow">Location and condition</div><h2>Filter motors</h2></div><div className="motor-filters__fields">{Object.entries(labels).map(([key, label]) => <label key={key}>{label}<select value={filters[key]} onChange={(event) => onChange(key, event.target.value)}><option>All</option>{options[key].map((option) => <option key={option}>{option}</option>)}</select></label>)}</div><span className="motor-filters__count">Showing {resultCount} motors</span></section>
 }
 
 function InfoTile({ label, value, detail, tone }) {

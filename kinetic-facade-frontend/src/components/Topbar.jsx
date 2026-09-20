@@ -1,6 +1,6 @@
-import { Bell, CircleHelp, Power, RotateCcw, Square } from 'lucide-react'
+import { Bell, CircleHelp, Clock3, Moon, Power, RotateCcw, Square, Sun } from 'lucide-react'
 
-function Topbar({ title, systemState, onStart, onStop, onReset, onRequestReset }) {
+function Topbar({ title, systemState, themeMode, onThemeChange, onStart, onStop, onReset, onRequestReset, onNotify, onHelp }) {
   return (
     <header className="topbar">
       <div className="topbar__content">
@@ -17,8 +17,13 @@ function Topbar({ title, systemState, onStart, onStop, onReset, onRequestReset }
       </div>
 
       <div className="topbar__utility">
-        <button className="icon-button" type="button" aria-label="Notifications"><Bell size={16} /><span className="icon-button__dot" /></button>
-        <button className="icon-button" type="button" aria-label="Help"><CircleHelp size={16} /></button>
+        <div className="theme-switcher" aria-label="Theme mode">
+          <button className={themeMode === 'light' ? 'theme-switcher__button theme-switcher__button--active' : 'theme-switcher__button'} type="button" onClick={() => onThemeChange('light')} aria-label="Use light mode" aria-pressed={themeMode === 'light'} title="Light mode"><Sun size={14} /></button>
+          <button className={themeMode === 'dark' ? 'theme-switcher__button theme-switcher__button--active' : 'theme-switcher__button'} type="button" onClick={() => onThemeChange('dark')} aria-label="Use dark mode" aria-pressed={themeMode === 'dark'} title="Dark mode"><Moon size={14} /></button>
+          <button className={themeMode === 'auto' ? 'theme-switcher__button theme-switcher__button--active' : 'theme-switcher__button'} type="button" onClick={() => onThemeChange('auto')} aria-label="Use automatic day and night mode" aria-pressed={themeMode === 'auto'} title="Automatic day and night mode"><Clock3 size={14} /></button>
+        </div>
+        <button className="icon-button" type="button" onClick={onNotify} aria-label="Notifications"><Bell size={16} /><span className="icon-button__dot" /></button>
+        <button className="icon-button" type="button" onClick={onHelp} aria-label="Help"><CircleHelp size={16} /></button>
       </div>
       <div className="topbar__actions">
         <button className="btn btn--success" type="button" onClick={onStart} disabled={systemState === 'Running'}><Power size={14} /> Start</button>

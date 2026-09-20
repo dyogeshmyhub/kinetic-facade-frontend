@@ -15,15 +15,19 @@ import {
   AlarmsPage,
   MotorsPage,
   OverviewPage,
-  ReportsPage,
   SequencesPage,
   SettingsPage,
 } from '../pages/WorkspacePages'
+import { AutomationPage, DevicesPage, EnvironmentPage, ReportsAnalytics, SchedulerPage } from '../pages/FeaturePages'
 
 const routes = {
   Overview: '/',
   Motors: '/motors',
   Sequences: '/sequences',
+  Automation: '/automation',
+  Scheduler: '/scheduler',
+  Environment: '/environment',
+  Devices: '/devices',
   Alarms: '/alarms',
   Reports: '/reports',
   Settings: '/settings',
@@ -33,9 +37,18 @@ const pageTitles = {
   Overview: 'Operations Dashboard',
   Motors: 'Motor Control Center',
   Sequences: 'Sequence Operations',
+  Automation: 'Automatic Control',
+  Scheduler: 'Facade Scheduler',
+  Environment: 'Environmental Monitoring',
+  Devices: 'ESP32 Devices',
   Alarms: 'Alarm History',
   Reports: 'Reports & Performance',
   Settings: 'System Settings',
+}
+
+function getAutomaticTheme() {
+  const hour = new Date().getHours()
+  return hour >= 7 && hour < 19 ? 'light' : 'dark'
 }
 
 function itemFromPath(pathname) {
@@ -53,6 +66,23 @@ function Dashboard() {
   const [notice, setNotice] = useState('Live control link established')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [resetRequested, setResetRequested] = useState(false)
+  const [themeMode, setThemeMode] = useState(() => window.localStorage.getItem('kinetic-facade-theme') || 'auto')
+
+  useEffect(() => {
+    const applyTheme = () => {
+      const resolvedTheme = themeMode === 'auto' ? getAutomaticTheme() : themeMode
+      document.documentElement.dataset.theme = resolvedTheme
+    }
+
+    applyTheme()
+    const timer = window.setInterval(applyTheme, 60 * 1000)
+    return () => window.clearInterval(timer)
+  }, [themeMode])
+
+  const handleThemeChange = (mode) => {
+    setThemeMode(mode)
+    window.localStorage.setItem('kinetic-facade-theme', mode)
+  }
 
   const showNotice = (message) => {
     setNotice(message)
@@ -64,7 +94,7 @@ function Dashboard() {
       .then(({ system, motors: remoteMotors, alarms: remoteAlarms }) => {
         setSystemState(system.status)
         setActiveStep(system.active_step)
-        setMotorState(remoteMotors)
+        setMotorState(remoteMotors.map((motor) => ({ ...motors.find((demoMotor) => demoMotor.id === motor.id), ...motor })))
         setAlarms(remoteAlarms)
         showNotice('PostgreSQL control link connected')
       })
@@ -143,8 +173,12 @@ function Dashboard() {
     Overview: <OverviewPage {...sharedProps} />,
     Motors: <MotorsPage {...sharedProps} />,
     Sequences: <SequencesPage {...sharedProps} />,
+    Automation: <AutomationPage />,
+    Scheduler: <SchedulerPage />,
+    Environment: <EnvironmentPage />,
+    Devices: <DevicesPage />,
     Alarms: <AlarmsPage {...sharedProps} />,
-    Reports: <ReportsPage />,
+    Reports: <ReportsAnalytics />,
     Settings: <SettingsPage systemState={systemState} onReset={handleReset} />,
   }[activeItem]
 
@@ -156,10 +190,14 @@ function Dashboard() {
         <Topbar
           title={pageTitles[activeItem]}
           systemState={systemState}
+          themeMode={themeMode}
+          onThemeChange={handleThemeChange}
           onStart={() => changeSystemState('start', 'System start command accepted')}
           onStop={() => changeSystemState('stop', 'System stopped safely')}
           onReset={handleReset}
           onRequestReset={() => setResetRequested(true)}
+          onNotify={() => showNotice('No new notifications; all events are up to date')}
+          onHelp={() => showNotice('Help: use the sidebar to open a workspace or the reset control for safe standby')}
         />
 
         <div className="operation-banner" role="status">
