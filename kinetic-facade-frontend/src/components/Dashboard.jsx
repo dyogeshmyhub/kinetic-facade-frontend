@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AlertTriangle, X } from 'lucide-react'
+import { updateProfile } from '../api/authApi'
 import { alarmHistory, motors } from '../data/dashboardData'
 import {
   acknowledgeAlarm,
@@ -56,7 +57,7 @@ function itemFromPath(pathname) {
   return entry ? entry[0] : 'Overview'
 }
 
-function Dashboard() {
+function Dashboard({ user, token, onLogout, onProfileUpdate }) {
   const [activeItem, setActiveItem] = useState(() => itemFromPath(window.location.pathname))
   const [systemState, setSystemState] = useState('Running')
   const [motorState, setMotorState] = useState(motors)
@@ -67,6 +68,7 @@ function Dashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [resetRequested, setResetRequested] = useState(false)
   const [themeMode, setThemeMode] = useState(() => window.localStorage.getItem('kinetic-facade-theme') || 'auto')
+  const [profileOpen, setProfileOpen] = useState(false)
 
   useEffect(() => {
     const applyTheme = () => {
@@ -198,6 +200,9 @@ function Dashboard() {
           onRequestReset={() => setResetRequested(true)}
           onNotify={() => showNotice('No new notifications; all events are up to date')}
           onHelp={() => showNotice('Help: use the sidebar to open a workspace or the reset control for safe standby')}
+          user={user}
+          onProfile={() => setProfileOpen(true)}
+          onLogout={onLogout}
         />
 
         <div className="operation-banner" role="status">
@@ -224,8 +229,31 @@ function Dashboard() {
           </section>
         </div>
       )}
+      {profileOpen && <ProfileDialog user={user} token={token} onClose={() => setProfileOpen(false)} onSaved={(updatedUser) => { onProfileUpdate(updatedUser); setProfileOpen(false); showNotice('Profile details updated') }} />}
     </div>
   )
+}
+
+function ProfileDialog({ user, token, onClose, onSaved }) {
+  const [fullName, setFullName] = useState(user.fullName)
+  const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const saveProfile = async (event) => {
+    event.preventDefault()
+    setError('')
+    setSaving(true)
+    try {
+      const result = await updateProfile(token, fullName)
+      onSaved(result.user)
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return <div className="modal-backdrop" role="presentation"><section className="confirm-modal profile-modal" role="dialog" aria-modal="true" aria-labelledby="profile-title"><button className="modal-close" type="button" onClick={onClose} aria-label="Close profile"><X size={17} /></button><div className="panel__eyebrow">Account settings</div><h2 id="profile-title">Your profile</h2><p>Update the details shown in your operator session.</p><form className="profile-form" onSubmit={saveProfile}><label>Full name<input value={fullName} onChange={(event) => setFullName(event.target.value)} required /></label><label>Email address<input value={user.email} readOnly /></label>{error && <div className="auth-message auth-message--error">{error}</div>}<div className="confirm-modal__actions"><button className="btn btn--ghost" type="button" onClick={onClose}>Cancel</button><button className="btn btn--primary" type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save profile'}</button></div></form></section></div>
 }
 
 export default Dashboard

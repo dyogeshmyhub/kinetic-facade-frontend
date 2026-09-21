@@ -51,9 +51,11 @@ export function OverviewPage({ motorState, onSpeedChange, onSync, alarms, onAckn
 }
 
 export function MotorsPage({ motorState, onSpeedChange, onSync }) {
-  const [filters, setFilters] = useState({ building: 'All', block: 'All', floor: 'All', facade: 'All', status: 'All', health: 'All' })
+  const [filters, setFilters] = useState({ motorType: 'All', site: 'All', building: 'All', block: 'All', floor: 'All', facade: 'All', status: 'All', health: 'All' })
   const [focusedMotorId, setFocusedMotorId] = useState(null)
   const filterOptions = {
+    motorType: [...new Set(motorState.map((motor) => motor.motorType))],
+    site: [...new Set(motorState.map((motor) => motor.site))],
     building: [...new Set(motorState.map((motor) => motor.building))],
     block: [...new Set(motorState.map((motor) => motor.block))],
     floor: [...new Set(motorState.map((motor) => motor.floor))].sort((a, b) => a - b),
@@ -169,7 +171,7 @@ function WorkspaceFrame({ eyebrow, title, description, children }) {
 }
 
 function MotorFilters({ filters, options, onChange, resultCount }) {
-  const labels = { building: 'Building', block: 'Block', floor: 'Floor', facade: 'Facade', status: 'Status', health: 'Health' }
+  const labels = { motorType: 'Motor type', site: 'Factory / residence', building: 'Building', block: 'Block', floor: 'Floor', facade: 'Facade', status: 'Status', health: 'Health' }
   return <section className="panel motor-filters"><div><div className="panel__eyebrow">Location and condition</div><h2>Filter motors</h2></div><div className="motor-filters__fields">{Object.entries(labels).map(([key, label]) => <label key={key}>{label}<select value={filters[key]} onChange={(event) => onChange(key, event.target.value)}><option>All</option>{options[key].map((option) => <option key={option}>{option}</option>)}</select></label>)}</div><span className="motor-filters__count">Showing {resultCount} motors</span></section>
 }
 

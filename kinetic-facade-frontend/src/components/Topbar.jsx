@@ -1,6 +1,6 @@
-import { Bell, CircleHelp, Clock3, Moon, Power, RotateCcw, Square, Sun } from 'lucide-react'
+import { Bell, CircleHelp, Clock3, LogOut, Moon, Power, RotateCcw, Square, Sun, UserRound } from 'lucide-react'
 
-function Topbar({ title, systemState, themeMode, onThemeChange, onStart, onStop, onReset, onRequestReset, onNotify, onHelp }) {
+function Topbar({ title, systemState, themeMode, onThemeChange, onStart, onStop, onReset, onRequestReset, onNotify, onHelp, user, onProfile, onLogout }) {
   return (
     <header className="topbar">
       <div className="topbar__content">
@@ -29,6 +29,8 @@ function Topbar({ title, systemState, themeMode, onThemeChange, onStart, onStop,
         <button className="btn btn--success" type="button" onClick={onStart} disabled={systemState === 'Running'}><Power size={14} /> Start</button>
         <button className="btn btn--warning" type="button" onClick={onStop} disabled={systemState === 'Stopped'}><Square size={13} /> Stop</button>
         <button className="btn btn--danger" type="button" onClick={onRequestReset || onReset}><RotateCcw size={14} /> Reset</button>
+        <button className="topbar__profile" type="button" onClick={onProfile} title="Edit profile"><UserRound size={15} /><span>{user.fullName}</span></button>
+        <button className="icon-button" type="button" onClick={onLogout} aria-label="Log out" title="Log out"><LogOut size={15} /></button>
       </div>
     </header>
   )
